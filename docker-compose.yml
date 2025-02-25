@@ -1,0 +1,89 @@
+
+version: "3.8"
+
+services:
+  # MySQL Database
+  mysql_db:
+    image: mysql:8.4
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: microservice-db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: root
+    ports:
+      - "3308:3306"
+    networks:
+      - ms-network
+
+  # Eureka Server
+  eureka-server:
+    image: nikitamane/eurekaserver  # Replace with your actual Eureka image
+    container_name: eureka-server
+    restart: always
+    ports:
+      - "8722:8761"
+    networks:
+      - ms-network
+
+  # Restaurant Listing Microservice
+  restorantlisting:
+    image: nikitamane/restorantlisting
+    container_name: restorantlistings
+    restart: always
+    depends_on:
+      - mysql_db
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    ports:
+      - "1019:9090"
+    networks:
+      - ms-network
+
+  # Food Catalogue Microservice
+  foodcatalogue:
+    image: nikitamane/foodcatalogue  # Replace with your actual Food Catalogue image
+    container_name: foodcatalogue
+    restart: always
+    depends_on:
+      - mysql_db
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    ports:
+      - "1013:9093"
+    networks:
+      - ms-network
+
+  # User Info Microservice
+  userinfo:
+    image: nikitamane/userinfo  # Replace with your actual User Info image
+    container_name: userinfo
+    restart: always
+    depends_on:
+      - mysql_db
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    ports:
+      - "1012:9092"
+    networks:
+      - ms-network
+
+networks:
+  ms-network:
+    driver: bridge
+
+
+

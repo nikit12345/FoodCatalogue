@@ -11,6 +11,10 @@ spring:
  jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect  # Add Hibernate dialect
+        show_sql: true  # Optional: Show SQL queries in logs
       
 eureka:
  instance:
