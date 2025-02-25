@@ -1,5 +1,5 @@
 
-version: "3.8"
+version: "3.9"
 
 services:
   # MySQL Database
@@ -18,7 +18,7 @@ services:
       - ms-network
 
   # Eureka Server
-  eureka-server:
+  eureka-servers:
     image: nikitamane/eurekaserver  # Replace with your actual Eureka image
     container_name: eureka-server
     restart: always
@@ -34,7 +34,7 @@ services:
     restart: always
     depends_on:
       - mysql_db
-      - eureka-server
+      - eureka-servers
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: admin
@@ -52,7 +52,7 @@ services:
     restart: always
     depends_on:
       - mysql_db
-      - eureka-server
+      - eureka-servers
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: admin
@@ -70,7 +70,7 @@ services:
     restart: always
     depends_on:
       - mysql_db
-      - eureka-server
+      - eureka-servers
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: admin
