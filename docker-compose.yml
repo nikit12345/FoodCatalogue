@@ -1,8 +1,6 @@
-
 version: "3.9"
 
 services:
-  # MySQL Database
   mysql_db:
     image: mysql:8.4
     container_name: mysql-container
@@ -16,74 +14,97 @@ services:
       - "3308:3306"
     networks:
       - ms-network
+      
+  mongodb:
+    image: mongo
+    container_name: mongodb-container
+    restart: always
+    networks:
+      - ms-network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: order-service
+    ports:
+      - "27017:27017"
 
-  # Eureka Server
-  eureka-servers:
-    image: nikitamane/eurekaserver  # Replace with your actual Eureka image
-    container_name: eureka-server
+  eureka-service:
+    image: nikitamane/eurekaserver
+    container_name: eureka-service
     restart: always
     ports:
       - "8722:8761"
     networks:
       - ms-network
+      
+  order-service:
+    build: .
+    image: nikitamane/order-service
+    container_name: order-service
+    restart: always
+    depends_on:
+      - eureka-service
+      - mongodb
+    networks:
+      - ms-network
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:admin@mongodb:27017/order-service?authSource=admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
 
-  # Restaurant Listing Microservice
+    ports:
+      - "1012:9092"
+
   restorantlisting:
     image: nikitamane/restorantlisting
     container_name: restorantlistings
     restart: always
     depends_on:
       - mysql_db
-      - eureka-servers
+      - eureka-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: root
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-    ports:
-      - "1019:9090"
-    networks:
-      - ms-network
-
-  # Food Catalogue Microservice
-  foodcatalogue:
-    image: nikitamane/foodcatalogue  # Replace with your actual Food Catalogue image
-    container_name: foodcatalogue
-    restart: always
-    depends_on:
-      - mysql_db
-      - eureka-servers
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: root
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
     ports:
       - "1013:9093"
     networks:
       - ms-network
 
-  # User Info Microservice
+  foodcatalogue:
+    image: nikitamane/foodcatalogue
+    container_name: foodcatalogue
+    restart: always
+    depends_on:
+      - mysql_db
+      - eureka-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+    ports:
+      - "1011:9091"
+    networks:
+      - ms-network
+
   userinfo:
-    image: nikitamane/userinfo  # Replace with your actual User Info image
+    image: nikitamane/userinfo
     container_name: userinfo
     restart: always
     depends_on:
       - mysql_db
-      - eureka-servers
+      - eureka-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/microservice-db?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: root
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
     ports:
-      - "1012:9092"
+      - "1014:9094"
     networks:
       - ms-network
 
 networks:
   ms-network:
     driver: bridge
-
-
-

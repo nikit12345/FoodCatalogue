@@ -23,7 +23,7 @@ public class FoodItemService {
 	
 	 public FoodItemDTO addFoodItem(FoodItemDTO foodItemDTO) {
 	        FoodItem foodItemSavedInDB = foodItemRepo.save(
-	        		FoodItem.builder().itemName(foodItemDTO.getItemName())
+	        		FoodItem.builder().itemName(foodItemDTO.getItemName()).id(foodItemDTO.getId())
 	        		.itemDescription(foodItemDTO.getItemDescription())
 	        		.isVeg(foodItemDTO.isVeg())
 	        		.price(foodItemDTO.getPrice())
@@ -31,7 +31,7 @@ public class FoodItemService {
 	        		.restaurantId(foodItemDTO.getRestaurantId()).build());
 	        
 	        return FoodItemDTO.builder().itemDescription(foodItemSavedInDB.getItemDescription())
-	        		.itemName(foodItemSavedInDB.getItemName())
+	        		.itemName(foodItemSavedInDB.getItemName()).id(foodItemSavedInDB.getId())
 	        		.isVeg(foodItemSavedInDB.isVeg())
 	        		.price(foodItemSavedInDB.getPrice())
 	        			.quantity(foodItemSavedInDB.getQuantity())
@@ -52,7 +52,7 @@ public class FoodItemService {
 	    }
 
 	private Restaurant fetchRestaurantDetailsFromRestaurantMS(Integer restaurantId) {
-	       return restTemplate.getForObject("http://RestorantListing:9090/restaurant/fetchById/"+restaurantId, Restaurant.class);
+	       return restTemplate.getForObject("http://RestorantListing/restaurant/fetchById/"+restaurantId, Restaurant.class);
 	    }
 
 	private List<FoodItem> fetchFoodItemList(Integer id) {
