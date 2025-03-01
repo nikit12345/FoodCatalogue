@@ -16,17 +16,18 @@ services:
       - ms-network
       
   mongodb:
-    image: mongo
-    container_name: mongodb-container
+    image: mongo  # Fixed image name
+    container_name: mongo_container
     restart: always
-    networks:
-      - ms-network
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
-      MONGO_INITDB_DATABASE: order-service
+       MONGO_INITDB_ROOT_USERNAME: admin
+       MONGO_INITDB_ROOT_PASSWORD: admin
+       MONGO_INITDB_DATABASE: order-service
     ports:
       - "27017:27017"
+    command: ["mongod", "--auth"]
+    networks:
+      - ms-network  # Added network
 
   eureka-service:
     image: nikitamane/eurekaserver
@@ -38,21 +39,19 @@ services:
       - ms-network
       
   order-service:
-    build: .
     image: nikitamane/order-service
     container_name: order-service
     restart: always
     depends_on:
       - eureka-service
       - mongodb
-    networks:
-      - ms-network
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:admin@mongodb:27017/order-service?authSource=admin
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
-
+      SPRING_DATA_MONGODB_URI: mongodb://admin:admin@mongo_container:27017/order-service?authSource=admin
     ports:
       - "1012:9092"
+    networks:
+      - ms-network
 
   restorantlisting:
     image: nikitamane/restorantlisting

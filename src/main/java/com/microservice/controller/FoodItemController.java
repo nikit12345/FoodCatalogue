@@ -18,7 +18,7 @@ import com.microservice.service.FoodItemService;
 
 @RestController
 @RequestMapping("/foodCatalogue")
-@CrossOrigin(origins = "http://localhost:4000")
+@CrossOrigin(origins = "*")
 public class FoodItemController {
 	
 	@Autowired
