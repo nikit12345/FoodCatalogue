@@ -17,7 +17,7 @@ services:
       
   mongodb:
     image: mongo  # Fixed image name
-    container_name: mongo_container
+    container_name: nikita-mongo-container
     restart: always
     environment:
        MONGO_INITDB_ROOT_USERNAME: admin
@@ -47,7 +47,7 @@ services:
       - mongodb
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
-      SPRING_DATA_MONGODB_URI: mongodb://admin:admin@mongo_container:27017/order-service?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://admin:admin@nikita-mongo-container:27017/order-service?authSource=admin
     ports:
       - "1012:9092"
     networks:
